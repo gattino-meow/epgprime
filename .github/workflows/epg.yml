@@ -1,0 +1,37 @@
+name: Aggiorna EPG
+
+on:
+  schedule:
+    - cron: "0 0,5,10,15,20 * * *"
+    - cron: "30 2,7,12,17,22 * * *"
+  workflow_dispatch:
+
+jobs:
+  run-epg:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Esegui script EPG
+        run: python epg.py
+
+      - name: Commit e push file aggiornato
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+          git add prime_epg.xml.gz
+
+          if git diff --cached --quiet; then
+            echo "Nessuna modifica"
+          else
+            git commit -m "Aggiornamento automatico EPG"
+            git push
+          fi
